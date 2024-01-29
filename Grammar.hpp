@@ -13,14 +13,19 @@ void program(std::istream &);
 
 std::string exprlist(std::istream &);
 
+std::string idlist(std::istream &);
+std::string idlist2(std::istream &, std::string incomingValue);
+
+std::string type(std::istream &);
+
 void expr(std::istream &);
 void expr2(std::istream &);
 
 void simpexpr(std::istream &);
 void simpexpr2(std::istream &);
 
-void term(std::istream &);
-void term2(std::istream &);
+std::string term(std::istream &);
+std::string term2(std::istream &, std::string incomingValue);
 
 std::string factor(std::istream &);
 #endif
