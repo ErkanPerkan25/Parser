@@ -43,8 +43,8 @@ int main(int argc, char *argv[])
     {
       if (tok.type()!=ERROR)
 	{
-	  // print out the successfully read Token
-	  cout << "Resulting token = " << tok << endl;
+        //cout << factor(ifile) << endl;
+        cout << "Resulting token = " << tok << endl;
 	}
       else // tok.type()==ERROR
 	{
@@ -57,5 +57,4 @@ int main(int argc, char *argv[])
 
   return 0;
 
-    return 0;
 }
