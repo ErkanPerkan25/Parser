@@ -11,21 +11,21 @@
 
 void program(std::istream &);
 
-std::string exprlist(std::istream &);
+bool exprlist(std::istream &);
 
-std::string idlist(std::istream &);
-std::string idlist2(std::istream &, std::string incomingValue);
+bool idlist(std::istream &);
+bool idlist2(std::istream &, std::string incomingValue);
 
-std::string type(std::istream &);
+bool type(std::istream &);
 
 void expr(std::istream &);
 void expr2(std::istream &);
 
-void simpexpr(std::istream &);
-void simpexpr2(std::istream &);
+bool simpexpr(std::istream &);
+bool simpexpr2(std::istream &, bool incomingValue);
 
-std::string term(std::istream &);
-std::string term2(std::istream &, std::string incomingValue);
+bool term(std::istream &);
+bool term2(std::istream &, bool incomingValue);
 
-std::string factor(std::istream &);
+bool factor(std::istream &);
 #endif
