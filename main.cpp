@@ -31,11 +31,15 @@ int main(int argc, char *argv[])
       return -1;
     }
 
-    // did the last get call say there were more tokens? 
-    cout << type(ifile) << endl;
-    cout << term(ifile) << endl;
-    cout << factor(ifile) << endl;
-    cout << idlist(ifile) << endl;
+    //if(program(ifile)){
+    //  cout << "# successful code ======================================" << endl;
+    //}
+    //else{
+    //  cout << "# UNsuccessful code ====================================" << endl;
+    //}
+    
+    //cout << idlist(ifile) << endl;
+    cout << expr(ifile) << endl;
 
   return 0;
 }

@@ -1,4 +1,4 @@
-/******************************************************
+/*****************************************************
  * Author: Eric Hansson
  * File: Grammar.cpp
  * Date:
@@ -50,10 +50,34 @@ bool type(std::istream &is){
 }
 /*
 string exprlist(std::istream &);
-
-void expr(std::istream &);
-void expr2(std::istream &);
 */
+bool expr(std::istream &is){
+    bool simpexprVal = simpexpr(is);
+
+    bool expr2Val = expr2(is,simpexprVal);
+
+    return expr2(is, expr2Val);
+}
+bool expr2(std::istream &is, bool incomingValue){
+    int pos = is.tellg();
+    Token tok;
+    tok.get(is);
+
+    bool result = incomingValue;
+
+    if (tok.type()==RELOP) {
+        result = true;
+    }
+    else {
+        is.seekg(pos);
+        return result;
+    }
+    
+    return expr2(is, result);
+}
+
+
+
 bool simpexpr(std::istream &is){
     bool termVal = term(is);
 
@@ -62,7 +86,22 @@ bool simpexpr(std::istream &is){
     return simpexpr2(is, simpexpr2Val);
 
 }
-bool simpexpr2(std::istream &is){
+bool simpexpr2(std::istream &is, bool incomingValue){
+    int pos = is.tellg();
+    Token tok;
+    tok.get(is);
+
+    bool result = incomingValue;
+
+    if (tok.type()==ADDOP) {  
+        result = true;
+    }
+    else{
+        is.seekg(pos);
+        return result;
+    }
+
+    return simpexpr2(is,result);
 
 }
 

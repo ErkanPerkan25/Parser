@@ -1,7 +1,7 @@
 /*******************************************
  * File: Token.cpp                         *
- * Author: Eric Hansson                    *
- * Date: 1/21/2023                         *
+ * Author: S. Blythe                       *
+ * Date: 12/2023                           *
  * PURPOSE: implementation for Token       *
  *******************************************/
 
