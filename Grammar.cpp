@@ -14,23 +14,28 @@ void program(std::istream &){
 }
 
 bool idlist(std::istream &is){
+    int pos = is.tellg();
+
     Token tok;
     tok.get(is);
 
     if (tok.type()==ID) {
         tok.get(is);
         if (tok.type()==COMMA) {
-            idlist(is);
+            return true;
         }
-        return true;
     }
     else {
+        // unget, read one too much
+        is.seekg(pos);
         return false;
     }
 
 }
 
 bool type(std::istream &is){
+    int pos = is.tellg();
+
     Token tok;
     tok.get(is);
 
@@ -44,92 +49,50 @@ bool type(std::istream &is){
         return  true; 
     }
     else {
+        is.seekg(pos);
         cerr << "Unexpected token: " << tok << endl;
-        return 0;
+        return false;
     }
 }
-/*
-string exprlist(std::istream &);
-*/
-bool expr(std::istream &is){
-    bool simpexprVal = simpexpr(is);
 
-    bool expr2Val = expr2(is,simpexprVal);
-
-    return expr2(is, expr2Val);
+bool exprlist(std::istream &is){
 }
-bool expr2(std::istream &is, bool incomingValue){
+
+bool expr(std::istream &is){
+}
+
+bool simpexpr(std::istream &is){
     int pos = is.tellg();
+
+    bool termVal = term(is);
+
     Token tok;
     tok.get(is);
 
-    bool result = incomingValue;
-
-    if (tok.type()==RELOP) {
-        result = true;
+    if (tok.type()==ADDOP) {
+        return true; 
     }
     else {
         is.seekg(pos);
-        return result;
+        return termVal;
     }
-    
-    return expr2(is, result);
-}
-
-
-
-bool simpexpr(std::istream &is){
-    bool termVal = term(is);
-
-    bool simpexpr2Val = simpexpr2(is, termVal);
-
-    return simpexpr2(is, simpexpr2Val);
-
-}
-bool simpexpr2(std::istream &is, bool incomingValue){
-    int pos = is.tellg();
-    Token tok;
-    tok.get(is);
-
-    bool result = incomingValue;
-
-    if (tok.type()==ADDOP) {  
-        result = true;
-    }
-    else{
-        is.seekg(pos);
-        return result;
-    }
-
-    return simpexpr2(is,result);
-
 }
 
 bool term(std::istream &is){
     bool factorVal = factor(is);
 
-    bool term2Val = term2(is, factorVal);
-
-    return term2Val;
-}
-
-bool term2(std::istream &is, bool incomingValue){
     int pos = is.tellg();
 
     Token tok;
     tok.get(is);
 
-    bool result = incomingValue;
-
-    if(tok.type()==MULOP){
-        result = true;
+    if (tok.type()==MULOP) {
+        return true;
     }
     else {
         is.seekg(pos);
-        return result;
+        return factorVal;
     }
-
-    return term2(is, result);
 }
 
 bool factor(std::istream &is){
