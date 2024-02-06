@@ -13,7 +13,7 @@ void program(std::istream &){
 
 }
 
-bool idlist(std::istream &is){
+string idlist(std::istream &is){
     int pos = is.tellg();
 
     Token tok;
@@ -22,64 +22,79 @@ bool idlist(std::istream &is){
     if (tok.type()==ID) {
         tok.get(is);
         if (tok.type()==COMMA) {
-            return true;
+            return idlist(is);
         }
     }
     else {
         // unget, read one too much
         is.seekg(pos);
-        return false;
+        return 0;
     }
 
 }
 
-bool type(std::istream &is){
+string type(std::istream &is){
     int pos = is.tellg();
 
     Token tok;
     tok.get(is);
 
     if(tok.type()==INTEGER){
-        return true; 
+        return tok.value(); 
     }
     else if(tok.type()==FLOAT){
-        return true; 
+        return tok.value(); 
     }
     else if(tok.type()==VOID){
-        return  true; 
+        return  tok.value(); 
     }
     else {
         is.seekg(pos);
         cerr << "Unexpected token: " << tok << endl;
-        return false;
+        return 0;
     }
 }
 
-bool exprlist(std::istream &is){
+string exprlist(std::istream &is){
 }
 
-bool expr(std::istream &is){
-}
-
-bool simpexpr(std::istream &is){
+string expr(std::istream &is){
     int pos = is.tellg();
 
-    bool termVal = term(is);
+    string simpexprVal = simpexpr(is);
+
+    Token tok;
+    tok.get(is);
+
+    if (tok.type()==RELOP) {
+        return simpexprVal + tok.value() + simpexpr(is); 
+    }
+    else {
+        is.seekg(pos);
+        return simpexprVal;
+    }
+}
+
+string simpexpr(std::istream &is){
+    int pos = is.tellg();
+
+    string termVal = term(is);
 
     Token tok;
     tok.get(is);
 
     if (tok.type()==ADDOP) {
-        return true; 
+        return termVal + tok.value() + simpexpr(is); 
     }
     else {
+        // unget the token
         is.seekg(pos);
         return termVal;
     }
 }
 
-bool term(std::istream &is){
-    bool factorVal = factor(is);
+string term(std::istream &is){
+    string result = factor(is);
 
     int pos = is.tellg();
 
@@ -87,20 +102,20 @@ bool term(std::istream &is){
     tok.get(is);
 
     if (tok.type()==MULOP) {
-        return true;
+        return result + tok.value() + term(is);
     }
     else {
         is.seekg(pos);
-        return factorVal;
+        return result;
     }
 }
 
-bool factor(std::istream &is){
+string factor(std::istream &is){
     Token tok;    
     tok.get(is);
 
     if(tok.type()==ID){
-        return true;
+            return tok.value().c_str();
     }
     /*
     else if(tok.type()== ID && tok.type()==LPAREN){
@@ -115,10 +130,10 @@ bool factor(std::istream &is){
     }
     */
     else if(tok.type()==NUM_REAL){
-        return true; 
+        return tok.value().c_str(); 
     }
     else if(tok.type()==NUM_INT){
-        return true; 
+        return tok.value().c_str(); 
     }
     else {
         cerr << "Unexpected token: " << tok << endl;

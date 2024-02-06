@@ -2,7 +2,7 @@
  * Author: Eric Hansson
  * File: Grammar.hpp
  * Date: 
- * Purpose: Implementing grammar 
+ * Purpose: Implementing grammar for parser
 **********************************************************/
 #ifndef _GRAMMAR_HPP_
 #define _GRAMMAR_HPP_
@@ -11,19 +11,19 @@
 
 void program(std::istream &);
 
-bool exprlist(std::istream &);
+std::string exprlist(std::istream &);
 
-bool idlist(std::istream &);
+std::string idlist(std::istream &);
 
-bool type(std::istream &);
+std::string type(std::istream &);
 
-bool exprlist(std::istream &);
+std::string exprlist(std::istream &);
 
-bool expr(std::istream &);
+std::string expr(std::istream &);
 
-bool simpexpr(std::istream &);
+std::string simpexpr(std::istream &);
 
-bool term(std::istream &);
+std::string term(std::istream &);
 
-bool factor(std::istream &);
+std::string factor(std::istream &);
 #endif
