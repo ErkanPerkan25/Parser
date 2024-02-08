@@ -11,6 +11,8 @@
 
 void program(std::istream &);
 
+std::string stmt(std::istream &);
+
 std::string exprlist(std::istream &);
 
 std::string idlist(std::istream &);

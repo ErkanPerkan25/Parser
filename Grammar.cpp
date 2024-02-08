@@ -13,22 +13,26 @@ void program(std::istream &){
 
 }
 
+// works better, but need debugging
 string idlist(std::istream &is){
     int pos = is.tellg();
 
     Token tok;
     tok.get(is);
+    
+    string idVal = tok.value();
 
     if (tok.type()==ID) {
         tok.get(is);
-        if (tok.type()==COMMA) {
-            return idlist(is);
-        }
+        if(tok.type()!=COMMA) 
+           cerr << "Unexpected token: " << tok << endl;
+
+        return idVal + tok.value() + idlist(is);
     }
     else {
         // unget, read one too much
         is.seekg(pos);
-        return 0;
+        return idVal;
     }
 
 }
@@ -56,18 +60,33 @@ string type(std::istream &is){
 }
 
 string exprlist(std::istream &is){
-}
-
-string expr(std::istream &is){
+    string exprVal = expr(is);
+    
     int pos = is.tellg();
 
+    Token tok;
+    tok.get(is);
+
+    if (tok.type()==COMMA) {
+        return exprVal + tok.value() + exprlist(is); 
+    }
+    else {
+        is.seekg(pos);
+        return exprVal;
+    }
+}
+
+// need to look at this
+string expr(std::istream &is){
     string simpexprVal = simpexpr(is);
+
+    int pos = is.tellg();
 
     Token tok;
     tok.get(is);
 
     if (tok.type()==RELOP) {
-        return simpexprVal + tok.value() + simpexpr(is); 
+        return simpexprVal + tok.value() + simpexpr(is);
     }
     else {
         is.seekg(pos);
@@ -76,11 +95,11 @@ string expr(std::istream &is){
 }
 
 string simpexpr(std::istream &is){
-    int pos = is.tellg();
-
     string termVal = term(is);
 
-    Token tok;
+    int pos = is.tellg();
+
+        Token tok;
     tok.get(is);
 
     if (tok.type()==ADDOP) {
@@ -115,7 +134,7 @@ string factor(std::istream &is){
     tok.get(is);
 
     if(tok.type()==ID){
-            return tok.value().c_str();
+            return tok.value();
     }
     /*
     else if(tok.type()== ID && tok.type()==LPAREN){
@@ -130,10 +149,10 @@ string factor(std::istream &is){
     }
     */
     else if(tok.type()==NUM_REAL){
-        return tok.value().c_str(); 
+        return tok.value(); 
     }
     else if(tok.type()==NUM_INT){
-        return tok.value().c_str(); 
+        return tok.value(); 
     }
     else {
         cerr << "Unexpected token: " << tok << endl;
