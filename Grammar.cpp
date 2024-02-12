@@ -7,13 +7,13 @@
 #include "Grammar.hpp"
 #include "Token.hpp"
 #include <iostream>
-#include <iterator>
 #include <string>
 
 using namespace std;
 
-string program(std::istream &is){
 
+string program(std::istream &is){
+    return declaration(is) + program(is);
 }
 
 string declaration(std::istream &is){
@@ -25,8 +25,13 @@ string declaration(std::istream &is){
     Token tok;
     tok.get(is);
 
-    if (tok.type()==SEMICOLON) {
-        return tok.value(); 
+    if (tok.type()!=SEMICOLON) {
+        is.seekg(pos);
+        cerr << "Expected ';', got:" << tok << endl;
+        return 0;
+    }
+    else if (tok.type()==SEMICOLON) {
+        return typeVal + " " + idlistVal + tok.value() + "\n"; 
     }
     else {
         is.seekg(pos);
@@ -35,25 +40,31 @@ string declaration(std::istream &is){
     }
 }
 
-// works better, but need debugging
 string idlist(std::istream &is){
-    int pos = is.tellg();
-
     Token tok;
     tok.get(is);
     
     string idVal = tok.value();
     if (tok.type()==ID) {
+        int pos = is.tellg();
+
         tok.get(is);
+
         if(tok.type()!=COMMA){
-            cerr << "Unexpected token: " << tok << endl;
+            is.seekg(pos);
+            return idVal;
         }
-        return idVal + tok.value() + idlist(is);
+        else if (tok.type()==COMMA) {
+            return idVal + tok.value() + " " + idlist(is);
+        }
+        else {
+            is.seekg(pos);
+            return idVal;
+        }
     }
     else {
-        // unget, read one too much
-        is.seekg(pos);
-        return idVal;
+        cerr << "Unexpected token: " << tok << endl;
+        return 0;
     }
 
 }
@@ -87,17 +98,27 @@ string compound(std::istream &is){
     tok.get(is);
 
     if (tok.type()==BEGIN) {
-        string stmtlistVal = stmtlist(is);
+        string beginVal = "  " + tok.value() + "\n";
+        string stmtlistVal = "    " + stmtlist(is) + "\n";
 
         tok.get(is);
 
         if (tok.type()!=END) {
             is.seekg(pos);
-            cerr << "Expected 'END', got:" << tok << endl;
+            cerr << "Unexpected token: " << tok << endl;
+            return 0;
         }
-        return stmtlistVal;
+        else if(tok.type()==END) {
+            return beginVal + stmtlistVal + "  " + tok.value();
+        }
+        else {
+            is.seekg(pos);
+            cerr << "Unexpected token: " << tok << endl;
+            return 0;
+        }
     }
     else {
+        is.seekg(pos);
         cerr << "Unexpected token: " << tok << endl;
         return 0;
     }
@@ -110,68 +131,112 @@ string stmtlist(std::istream &is){
 
     Token tok;
     tok.get(is);
-
-    if (tok.type()==SEMICOLON) {
-        return stmtVal + tok.value() + stmtlist(is); 
+    if (tok.type()!=SEMICOLON){
+        is.seekg(pos);
+        return stmtVal;
+    }
+    else if (tok.type()==SEMICOLON) {
+        return stmtVal + tok.value() + "\n" + stmtlist(is); 
     }
     else {
         is.seekg(pos);
         return stmtVal;
     }
-
 }
 
 string stmt(std::istream &is){
-    string compoundVal = compound(is);
 
     Token tok;
     tok.get(is);
+    
+    string idVal;
+    if(tok.type()==ID){
+        int pos = is.tellg();
+        idVal = tok.value();
+        
+        tok.get(is);
 
-    if (tok.type()==ID) {
-        tok.get(is); 
-
-        if (tok.type()==LPAREN) {
-            string pval = exprlist(is);
-
-            if (tok.type()!=RPAREN)
-                cerr << "Expected ')', got: " << tok << endl;
-
-           return pval;    
+        if (tok.type()!=LPAREN && tok.type()!=ASSIGNOP) {
+            is.seekg(pos);
+            return idVal; 
         }
+        else if (tok.type()==LPAREN) {
+            string pval = exprlist(is);
+            
+            tok.get(is);
 
-        if (tok.type()==ASSIGNOP) { 
-            return expr(is);
+            if (tok.type()!=RPAREN){
+                cerr << "Expected ')', got: " << tok << endl;
+            }
+           return idVal + "(" + pval + ")"; 
+        }
+        else if (tok.type()==ASSIGNOP) { 
+            return idVal + " = " + expr(is);
+        }
+        else {
+            is.seekg(pos);
+            return idVal;
         }
     }
+     
     if (tok.type()==IF) {  
         string exprVal = expr(is);
+        string ifVal = tok.value();
+
+        int pos = is.tellg();
+
         tok.get(is);
 
         if (tok.type()==THEN) {
-            return compound(is); 
+            string compVal = compound(is);
+            tok.get(is);
+            if (tok.type()==ELSE) {
+                return ifVal + " " + exprVal + " then" + "\n" + compVal +"\n else \n" + compound(is); 
+            }
+            else {
+                is.seekg(pos);
+                cerr << "Unexpected token: " << tok << endl;
+                return 0;
+            }
         }
-        if (tok.type()==ELSE) {
-            return compound(is); 
+        else {
+            is.seekg(pos);
+            cerr << "Unexpected token: " << tok << endl;
+            return 0;
         }
     }
 
     if (tok.type()==WHILE) {
+        int pos = is.tellg();
+
         tok.get(is);
-        if (tok.type()==LPAREN) {
-            string exprVal = expr(is);
 
-            if (tok.type()!=RPAREN)
-                cerr << "Expected ')', got: " << tok << endl;
-
-           return exprVal;    
+        if (tok.type()!=LPAREN) {
+            is.seekg(pos);
+            return 0; 
         }
-        return compoundVal;
-    
+
+        else if (tok.type()==LPAREN) {
+            string exprVal = expr(is);
+            
+            tok.get(is);
+
+            if (tok.type()!=RPAREN){
+                cerr << "Expected ')', got: " << tok << endl;
+            }
+
+           return "while ( " + exprVal + " ) \n" + compound(is); 
+        }
+        else {
+            is.seekg(pos);
+            return 0;
+        }
     }
     else {
-        return compoundVal;
+        return compound(is);
     }
 }
+
 
 string exprlist(std::istream &is){
     string exprVal = expr(is);
@@ -190,7 +255,6 @@ string exprlist(std::istream &is){
     }
 }
 
-// need to look at this
 string expr(std::istream &is){
     string simpexprVal = simpexpr(is);
 
@@ -246,25 +310,35 @@ string term(std::istream &is){
 string factor(std::istream &is){
     Token tok;    
     tok.get(is);
-
-    if(tok.type()==ID){
-        string idVal = tok.value();
-        tok.get(is);
-        
-        if (tok.type()==LPAREN) {
-            string pval = exprlist(is);
-            string lpar = tok.value();
-
-            tok.get(is); 
-
-            if (tok.type()!=RPAREN)
-                cerr << "Expected ')', got: " << tok << endl;
-
-           return idVal + lpar + pval + tok.value(); 
-        }
-        return tok.value();
-    }
     
+    string idVal;
+    if(tok.type()==ID){
+        int pos = is.tellg();
+
+        idVal = tok.value();
+        
+        tok.get(is);
+        if (tok.type()!=LPAREN) {
+            is.seekg(pos);
+            return idVal; 
+        }
+
+        else if (tok.type()==LPAREN) {
+            string pval = exprlist(is);
+            
+            tok.get(is);
+
+            if (tok.type()!=RPAREN){
+                cerr << "Expected ')', got: " << tok << endl;
+            }
+
+           return idVal + "(" + pval + ")"; 
+        }
+        else {
+            is.seekg(pos);
+            return idVal;
+        }
+    }
     else if(tok.type()==NUM_REAL){
         return tok.value(); 
     }
