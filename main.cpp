@@ -1,9 +1,11 @@
 /****************************************************
  * Author: Eric Hansson
  * File: main.cpp
- * Date:
- * Prupose:
+ * Date: 2/13/2024
+ * Prupose: To read in a file, and if there is no invalid
+ * program, print out the beautfied code of it
 *****************************************************/
+#include <cstdio>
 #include <iostream>
 #include <fstream>
 
@@ -31,15 +33,13 @@ int main(int argc, char *argv[])
       return -1;
     }
 
-    //if(program(ifile)){
-    //  cout << "# successful code ======================================" << endl;
-    //}
-    //else{
-    //  cout << "# UNsuccessful code ====================================" << endl;
-    //}
-    
-    //cout << idlist(ifile) << endl;
-    cout << expr(ifile) << endl;
+    if (ifile.is_open()) {
+        cout << "Successful code ===========================================" << endl;
+        cout << program(ifile) << endl;
+    } 
+    else {
+        cout << "UNsucessful code ==========================================" << endl;
+    }
 
   return 0;
 }
